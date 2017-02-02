@@ -8,40 +8,45 @@
 
 import Foundation
 
-/// Provides current date. Needed for testing.
-internal var now: () -> Date = { Date() }
+struct FrId {
 
-/// Fancy ID generator that creates 20-character string identifiers with the following properties:
-///
-/// 1. They're based on timestamp so that they sort *after* any existing ids.
-/// 2. They contain 72-bits of random data after the timestamp so that IDs won't collide with other clients' IDs.
-/// 3. They sort *lexicographically* (so the timestamp is converted to characters that will sort properly).
-/// 4. They're monotonically increasing. Even if you generate more than one in the same timestamp, the
-///    latter ones will sort after the former ones. We do this by using the previous random bits
-///    but "incrementing" them by 1 (only in the case of a timestamp collision).
-///
-/// - Returns: generated id
-public func frId() -> String {
-
-  let nowMilliseconds = UInt64(now().timeIntervalSince1970 * 1000)
-  defer { lastMilliseconds = nowMilliseconds }
-
-  // Convert timestamp to characters from alphabet.
-  let timeStampChars = (0...7)
-    .reversed()
-    .map { (shiftMultiplier: Int) -> UInt64 in nowMilliseconds >> UInt64(6 * shiftMultiplier) }
-    .map { (rnd: UInt64) -> Int in Int(rnd % 64) }
-    .map { (index: Int) -> Character in alphabetCharacters[index] }
-
-  let duplicateTime = nowMilliseconds == lastMilliseconds
-  // If the timestamp hasn't changed since last generation, use the same random number, except incremented by 1.
-  randomCharactersIndexes = duplicateTime ? inc(randomCharactersIndexes) : generateNewRandomIndexes()
-
-  let randomCharacters = randomCharactersIndexes.map { alphabetCharacters[$0] }
-
-  let idCharacters = timeStampChars + randomCharacters
-
-  return String(idCharacters)
+  private init() { }
+  
+  /// Provides current date. Needed for testing.
+  internal static var now: () -> Date = { Date() }
+ 
+  /// Fancy ID generator that creates 20-character string identifiers with the following properties:
+  ///
+  /// 1. They're based on timestamp so that they sort *after* any existing ids.
+  /// 2. They contain 72-bits of random data after the timestamp so that IDs won't collide with other clients' IDs.
+  /// 3. They sort *lexicographically* (so the timestamp is converted to characters that will sort properly).
+  /// 4. They're monotonically increasing. Even if you generate more than one in the same timestamp, the
+  ///    latter ones will sort after the former ones. We do this by using the previous random bits
+  ///    but "incrementing" them by 1 (only in the case of a timestamp collision).
+  ///
+  /// - Returns: generated id
+  public static func generate() -> String {
+    
+    let nowMilliseconds = UInt64(now().timeIntervalSince1970 * 1000)
+    defer { lastMilliseconds = nowMilliseconds }
+    
+    // Convert timestamp to characters from alphabet.
+    let timeStampChars = (0...7)
+      .reversed()
+      .map { (shiftMultiplier: Int) -> UInt64 in nowMilliseconds >> UInt64(6 * shiftMultiplier) }
+      .map { (rnd: UInt64) -> Int in Int(rnd % 64) }
+      .map { (index: Int) -> Character in alphabetCharacters[index] }
+    
+    let duplicateTime = nowMilliseconds == lastMilliseconds
+    // If the timestamp hasn't changed since last generation, use the same random number, except incremented by 1.
+    randomCharactersIndexes = duplicateTime ? inc(randomCharactersIndexes) : generateNewRandomIndexes()
+    
+    let randomCharacters = randomCharactersIndexes.map { alphabetCharacters[$0] }
+    
+    let idCharacters = timeStampChars + randomCharacters
+    
+    return String(idCharacters)
+  }
 }
 
 /// Modeled after base64 web-safe chars, but ordered by ASCII.
