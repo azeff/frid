@@ -22,25 +22,25 @@ internal var now: () -> Date = { Date() }
 ///
 /// - Returns: generated id
 public func frId() -> String {
-  
+
   let nowMilliseconds = UInt64(now().timeIntervalSince1970 * 1000)
   defer { lastMilliseconds = nowMilliseconds }
-  
+
   // Convert timestamp to characters from alphabet.
   let timeStampChars = (0...7)
     .reversed()
     .map { (shiftMultiplier: Int) -> UInt64 in nowMilliseconds >> UInt64(6 * shiftMultiplier) }
     .map { (rnd: UInt64) -> Int in Int(rnd % 64) }
     .map { (index: Int) -> Character in alphabetCharacters[index] }
-  
+
   let duplicateTime = nowMilliseconds == lastMilliseconds
   // If the timestamp hasn't changed since last generation, use the same random number, except incremented by 1.
   randomCharactersIndexes = duplicateTime ? inc(randomCharactersIndexes) : generateNewRandomIndexes()
-  
+
   let randomCharacters = randomCharactersIndexes.map { alphabetCharacters[$0] }
-  
+
   let idCharacters = timeStampChars + randomCharacters
-  
+
   return String(idCharacters)
 }
 
@@ -61,7 +61,7 @@ private func generateNewRandomIndexes() -> [Int] {
   return (0...11).map { _ in Int(arc4random_uniform(64)) }
 }
 
-/// Increment random number by 1. 
+/// Increment random number by 1.
 /// Number is presented in form of array of 'digits'.
 /// Base == `alphabetCharacters.count`
 ///
