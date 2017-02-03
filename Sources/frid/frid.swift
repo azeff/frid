@@ -8,13 +8,13 @@
 
 import Foundation
 
-struct FrId {
+public struct FrId {
 
   private init() { }
-  
+
   /// Provides current date. Needed for testing.
   internal static var now: () -> Date = { Date() }
- 
+
   /// Fancy ID generator that creates 20-character string identifiers with the following properties:
   ///
   /// 1. They're based on timestamp so that they sort *after* any existing ids.
@@ -26,25 +26,25 @@ struct FrId {
   ///
   /// - Returns: generated id
   public static func generate() -> String {
-    
+
     let nowMilliseconds = UInt64(now().timeIntervalSince1970 * 1000)
     defer { lastMilliseconds = nowMilliseconds }
-    
+
     // Convert timestamp to characters from alphabet.
     let timeStampChars = (0...7)
       .reversed()
       .map { (shiftMultiplier: Int) -> UInt64 in nowMilliseconds >> UInt64(6 * shiftMultiplier) }
       .map { (rnd: UInt64) -> Int in Int(rnd % 64) }
       .map { (index: Int) -> Character in alphabetCharacters[index] }
-    
+
     let duplicateTime = nowMilliseconds == lastMilliseconds
     // If the timestamp hasn't changed since last generation, use the same random number, except incremented by 1.
     randomCharactersIndexes = duplicateTime ? inc(randomCharactersIndexes) : generateNewRandomIndexes()
-    
+
     let randomCharacters = randomCharactersIndexes.map { alphabetCharacters[$0] }
-    
+
     let idCharacters = timeStampChars + randomCharacters
-    
+
     return String(idCharacters)
   }
 }

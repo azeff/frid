@@ -1,5 +1,8 @@
 import PackageDescription
 
 let package = Package(
-    name: "frid"
+    name: "frid",
+    targets: [
+      Target(name: "fridgen", dependencies: ["frid"])
+    ]
 )
