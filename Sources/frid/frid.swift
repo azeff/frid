@@ -6,7 +6,7 @@
 //  Copyright © 2017 Evgeny Kazakov. All rights reserved.
 //
 
-import Foundation
+import struct Foundation.Date
 
 public struct FrId {
 
@@ -44,7 +44,7 @@ public struct FrId {
     let randomCharacters = randomCharactersIndexes.map { alphabetCharacters[$0] }
 
     let idCharacters = timeStampChars + randomCharacters
-
+    
     return String(idCharacters)
   }
 }
@@ -63,7 +63,7 @@ private var lastMilliseconds: UInt64 = 0
 private var randomCharactersIndexes: [Int] = generateNewRandomIndexes()
 
 private func generateNewRandomIndexes() -> [Int] {
-  return (0...11).map { _ in Int(arc4random_uniform(64)) }
+  return (0...11).map { _ in Int(rnd(64)) }
 }
 
 /// Increment random number by 1.
@@ -82,4 +82,33 @@ private func inc(_ rnd: [Int]) -> [Int] {
   }
   incremented[index] += 1
   return incremented
+}
+
+// MARK: Random implementation
+
+#if os(Linux) || os(Android) || os(FreeBSD)
+  import Glibc
+#else
+  import Darwin
+#endif
+
+private func rnd(_ upperBound: UInt32) -> UInt32 {
+  #if os(Linux) || os(Android) || os(FreeBSD)
+    let urandom = open("/dev/urandom", O_RDONLY)
+    guard urandom > 0 else {
+      fatalError("Failed to open /dev/urandom")
+    }
+    
+    defer { close(urandom) }
+    
+    var value: UInt32 = 0
+    let readResult = read(urandom, &value, MemoryLayout<UInt32>.size)
+    guard readResult == MemoryLayout<UInt32>.size else {
+      fatalError("Failed to read from /dev/urandom. Result code \(readResult)")
+    }
+    
+    return value % upperBound
+  #else
+    return arc4random_uniform(upperBound)
+  #endif
 }

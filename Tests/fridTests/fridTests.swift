@@ -6,6 +6,7 @@
 //  Copyright © 2017 Evgeny Kazakov. All rights reserved.
 //
 
+import Foundation
 import XCTest
 @testable import frid
 
@@ -49,4 +50,13 @@ class fridTests: XCTestCase {
     XCTAssert(idNow < idFuture, "'\(idNow)' should be less than '\(idFuture)'")
   }
 
+}
+
+extension fridTests {
+  static var allTests: [(String, (fridTests) -> () throws -> Void )] {
+    return [
+      ("testSameTimeOrder", testSameTimeOrder),
+      ("testOrder", testOrder)
+    ]
+  }
 }
