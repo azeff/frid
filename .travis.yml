@@ -6,7 +6,6 @@ services:
 os:
   - linux
   - osx
-
 osx_image: xcode8.2
 
 before_install:
