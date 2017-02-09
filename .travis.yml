@@ -9,8 +9,8 @@ os:
 osx_image: xcode8.2
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker image build -t azeff/fridbuild .; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker build -t azeff/fridbuild .; fi
   
 script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then swift build && swift test          ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker container run azeff/fridbuild /bin/sh -c "cd /root/build; swift build; swift test"; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run azeff/fridbuild /bin/sh -c "cd /root/build; swift build; swift test"; fi
