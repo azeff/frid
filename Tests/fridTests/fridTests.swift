@@ -12,6 +12,9 @@ import XCTest
 
 class fridTests: XCTestCase {
 
+  /// Locale for string comparison to workaround https://bugs.swift.org/browse/SR-530
+  private let posixLocale = Locale(identifier: "en_US_POSIX")
+
   override func setUp() {
     super.setUp()
   }
@@ -29,7 +32,7 @@ class fridTests: XCTestCase {
     let id2 = FrId.generate()
 
     XCTAssertNotEqual(id1, id2, "ids for the same time should be different")
-    XCTAssert(id1 < id2)
+    XCTAssert(id1.compare(id2, options: [], range: nil, locale: posixLocale) == .orderedAscending)
   }
 
   func testOrder() {
@@ -46,8 +49,10 @@ class fridTests: XCTestCase {
     FrId.now = { future }
     let idFuture = FrId.generate()
 
-    XCTAssert(idPast < idNow, "'\(idPast)' should be less than '\(idNow)'")
-    XCTAssert(idNow < idFuture, "'\(idNow)' should be less than '\(idFuture)'")
+    XCTAssert(idPast.compare(idNow, options: [], range: nil, locale: posixLocale) == .orderedAscending,
+              "'\(idPast)' should be less than '\(idNow)'")
+    XCTAssert(idNow.compare(idFuture, options: [], range: nil, locale: posixLocale) == .orderedAscending,
+              "'\(idNow)' should be less than '\(idFuture)'")
   }
 
 }
